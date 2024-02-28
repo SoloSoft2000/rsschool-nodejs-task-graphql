@@ -1,7 +1,7 @@
 import { GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 
-export const PostsType = new GraphQLObjectType({
-  name: 'Posts',
+export const PostType = new GraphQLObjectType({
+  name: 'Post',
   fields: {
     id: { type: new GraphQLNonNull(GraphQLString) },
     title: { type: GraphQLString },

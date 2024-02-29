@@ -5,6 +5,7 @@ import { ProfileType } from './types/profileType.js';
 import { UserType } from './types/userType.js';
 import { PrismaClient } from '@prisma/client';
 import { UUIDType } from './types/uuid.js';
+import { getPost, getUser, getProfile } from './getsData.js';
 
 export const QueryType = new GraphQLObjectType({
   name: 'Query',
@@ -47,11 +48,7 @@ export const QueryType = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(UUIDType) }
       },
       resolve: (source, args: { id: string }, context: { prisma: PrismaClient }) =>
-        context.prisma.post.findUnique({
-          where: {
-            id: args.id,
-          },
-        }),
+        getPost(args.id, context)
     },
     user: {
       type: UserType,
@@ -59,23 +56,16 @@ export const QueryType = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(UUIDType) }
       },
       resolve: (source, args: { id: string }, context: { prisma: PrismaClient }) =>
-        context.prisma.user.findUnique({
-          where: {
-            id: args.id,
-          },
-        }),
+        getUser(args.id, context)
     },
     profile: {
       type: ProfileType,
       args: {
         id: { type: new GraphQLNonNull(UUIDType) }
       },
-      resolve: (source, args: { id: string }, context: { prisma: PrismaClient }) =>
-        context.prisma.profile.findUnique({
-          where: {
-            id: args.id,
-          },
-        }),
-    },
+      resolve: async (source, args: { id: string }, context: { prisma: PrismaClient }) =>
+        getProfile(args.id, context)
+    }, 
   },
 });
+

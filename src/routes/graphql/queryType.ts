@@ -5,7 +5,7 @@ import { ProfileType } from './types/profileType.js';
 import { UserType } from './types/userType.js';
 import { PrismaClient } from '@prisma/client';
 import { UUIDType } from './types/uuid.js';
-import { getPost, getUser, getProfile } from './getsData.js';
+import { getPost, getUser, getProfile, getMemberType } from './getsData.js';
 
 export const QueryType = new GraphQLObjectType({
   name: 'Query',
@@ -21,11 +21,7 @@ export const QueryType = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(MemberTypeIdType)}
       },
       resolve: (source, args: { id: string }, context: { prisma: PrismaClient }) =>
-        context.prisma.memberType.findUnique({
-          where: {
-            id: args.id,
-          },
-        }),
+        getMemberType(args.id, context)
     },
     posts: {
       type: new GraphQLList(PostType),

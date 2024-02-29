@@ -1,12 +1,29 @@
 import { PrismaClient } from '@prisma/client';
 
-export const getProfile = async (id: string, context: { prisma: PrismaClient }) => {
-  const result =
-    (await context.prisma.profile.findUnique({
+export const getMemberType = async (id: string, context: { prisma: PrismaClient}) => {
+  const result = await context.prisma.memberType.findUnique({
+    where: {
+      id,
+    },
+  })
+  return result;
+}
+
+export const getProfile = async (argsid: string, context: { prisma: PrismaClient }) => {
+  const result = await context.prisma.profile.findUnique({
       where: {
-        id,
+        id: argsid,
       },
-    })) || null;
+    });
+  return result;
+};
+
+export const getProfileByUserId = async (argsid: string, context: { prisma: PrismaClient }) => {
+  const result = await context.prisma.profile.findUnique({
+      where: {
+        userId: argsid,
+      },
+    });
   return result;
 };
 

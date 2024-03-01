@@ -4,10 +4,9 @@ import { getProfileByUserId } from "../getsData.js";
 import { PrismaClient } from "@prisma/client";
 import { PostType } from "./postType.js";
 
-
 export const UserType = new GraphQLObjectType({
   name: 'User',
-  fields: {
+  fields: () => ({
     id: { type: new GraphQLNonNull(GraphQLString) },
     name: { type: GraphQLString },
     balance: { type: GraphQLInt },
@@ -23,6 +22,35 @@ export const UserType = new GraphQLObjectType({
             authorId: user.id
           }
         })
+    },
+    userSubscribedTo: {
+      type: new GraphQLList(UserType),
+      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) => {
+        return context.prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: user.id
+              }
+            }
+          }
+        })
+      }
+    },
+    subscribedToUser: {
+      type: new GraphQLList(UserType),
+      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) => {
+        return context.prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: user.id
+              }
+            }
+          }
+        })
+      }
     }
-  }
+
+  })
 });

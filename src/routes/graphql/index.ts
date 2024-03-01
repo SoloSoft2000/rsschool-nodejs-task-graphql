@@ -3,13 +3,12 @@ import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
 import { GraphQLSchema, graphql, validate, parse } from 'graphql';
 import { QueryType } from './queryType.js';
 import depthLimit from 'graphql-depth-limit';
+import { MutationType } from './mutationType.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
-
   
-  
-  const schema = new GraphQLSchema({ query: QueryType });
+  const schema = new GraphQLSchema({ query: QueryType, mutation: MutationType });
   
   fastify.route({
     url: '/',

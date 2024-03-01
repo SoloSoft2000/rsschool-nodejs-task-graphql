@@ -1,8 +1,9 @@
-import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
+import { GraphQLBoolean, GraphQLInputObjectType, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { MemberType } from "./memberType.js";
 import { PrismaClient } from ".prisma/client";
 import { getMemberType } from "../getsData.js";
 import { MemberTypeId } from "../../member-types/schemas.js";
+import { UUIDType } from "./uuid.js";
 
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
@@ -16,5 +17,15 @@ export const ProfileType = new GraphQLObjectType({
           return getMemberType(prof.memberTypeId, context)
         }
     }
+  }
+});
+
+export const newProfile = new GraphQLInputObjectType({
+  name: 'newProfile',
+  fields: {
+    isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
+    yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
+    userId: { type: new GraphQLNonNull(UUIDType)},
+    memberTypeId: { type: new GraphQLNonNull(GraphQLString) }
   }
 });

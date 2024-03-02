@@ -8,7 +8,10 @@ import { MutationType } from './mutationType.js';
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
   
-  const schema = new GraphQLSchema({ query: QueryType, mutation: MutationType });
+  const schema = new GraphQLSchema({
+    query: QueryType,
+    mutation: MutationType
+  });
   
   fastify.route({
     url: '/',
@@ -26,12 +29,14 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       if (valid.length) {
         return { errors: valid };
       }
+      
       const result = await graphql({
         schema,
         source: query,
         variableValues: variables,
         contextValue: { prisma }
       })
+
       return result;
     },
   });

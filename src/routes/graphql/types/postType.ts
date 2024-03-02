@@ -10,8 +10,8 @@ export const PostType = new GraphQLObjectType({
   }
 });
 
-export const newPost = new GraphQLInputObjectType({
-  name: 'newPost',
+export const CreatePostInput = new GraphQLInputObjectType({
+  name: 'CreatePostInput',
   fields: {
     title: { type: new GraphQLNonNull(GraphQLString) },
     content: { type: new GraphQLNonNull(GraphQLString) },

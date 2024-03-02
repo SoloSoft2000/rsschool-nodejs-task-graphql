@@ -1,27 +1,28 @@
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import { PostType, newPost } from './types/postType.js';
+import { PostType, CreatePostInput } from './types/postType.js';
 import { PrismaClient } from '@prisma/client';
-import { UserType, newUser } from './types/userType.js';
-import { ProfileType, newProfile } from './types/profileType.js';
+import { UserType, CreateUserInput } from './types/userType.js';
+import { ProfileType, CreateProfileInput } from './types/profileType.js';
 
 export const MutationType = new GraphQLObjectType({
   name: 'Mutation',
-  fields: () => ({
+  fields: {
     createPost: {
-      type: PostType,
+      type: new GraphQLNonNull(PostType),
       args: {
         dto: {
-          type: new GraphQLNonNull(newPost),
+          type: new GraphQLNonNull(CreatePostInput),
         },
       },
-      resolve: (
+      resolve: async (
         source,
         args: { dto: { title: string, content: string, authorId: string } },
         context: { prisma: PrismaClient },
       ) => {
-        return context.prisma.post.create({
+        const result = await context.prisma.post.create({
           data: args.dto,
         });
+        return result;
       },
     },
     createUser: {
@@ -29,7 +30,7 @@ export const MutationType = new GraphQLObjectType({
       type: UserType,
       args: {
         dto: {
-          type: new GraphQLNonNull(newUser),
+          type: new GraphQLNonNull(CreateUserInput),
         },
       },
       resolve: (
@@ -46,7 +47,7 @@ export const MutationType = new GraphQLObjectType({
       type: ProfileType,
       args: {
         dto: {
-          type: new GraphQLNonNull(newProfile),
+          type: new GraphQLNonNull(CreateProfileInput),
         },
       },
       resolve: (
@@ -62,5 +63,5 @@ export const MutationType = new GraphQLObjectType({
         });
       },
     },
-  }),
+  },
 });

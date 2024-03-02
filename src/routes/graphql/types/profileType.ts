@@ -20,8 +20,8 @@ export const ProfileType = new GraphQLObjectType({
   }
 });
 
-export const newProfile = new GraphQLInputObjectType({
-  name: 'newProfile',
+export const CreateProfileInput = new GraphQLInputObjectType({
+  name: 'CreateProfileInput',
   fields: {
     isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
     yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },

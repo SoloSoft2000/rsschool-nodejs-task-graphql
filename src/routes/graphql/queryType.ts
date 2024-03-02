@@ -47,7 +47,6 @@ export const QueryType = new GraphQLObjectType({
         getPost(args.id, context)
     },
     user: {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       type: UserType,
       args: {
         id: { type: new GraphQLNonNull(UUIDType) }

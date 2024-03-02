@@ -1,8 +1,9 @@
-import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { PostType, CreatePostInput } from './types/postType.js';
 import { PrismaClient } from '@prisma/client';
 import { UserType, CreateUserInput } from './types/userType.js';
 import { ProfileType, CreateProfileInput } from './types/profileType.js';
+import { UUIDType } from './types/uuid.js';
 
 export const MutationType = new GraphQLObjectType({
   name: 'Mutation',
@@ -26,7 +27,6 @@ export const MutationType = new GraphQLObjectType({
       },
     },
     createUser: {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       type: UserType,
       args: {
         dto: {
@@ -61,6 +61,66 @@ export const MutationType = new GraphQLObjectType({
         return context.prisma.profile.create({
           data: args.dto,
         });
+      },
+    },
+    deletePost: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      args: {
+        id: {
+          type: new GraphQLNonNull(UUIDType),
+        },
+      },
+      resolve: async (
+        source,
+        args: { id: string },
+        context: { prisma: PrismaClient },
+      ) => {
+        const result = await context.prisma.post.delete({
+          where: {
+            id: args.id
+          }
+        });
+        return result ? true : false;
+      },
+    },
+    deleteProfile: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      args: {
+        id: {
+          type: new GraphQLNonNull(UUIDType),
+        },
+      },
+      resolve: async (
+        source,
+        args: { id: string },
+        context: { prisma: PrismaClient },
+      ) => {
+        const result = await context.prisma.profile.delete({
+          where: {
+            id: args.id
+          }
+        });
+        return result ? true : false;
+      },
+    },
+    deleteUser: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      args: {
+        id: {
+          type: new GraphQLNonNull(UUIDType),
+        },
+      },
+      resolve: async (
+        source,
+        args: { id: string },
+        context: { prisma: PrismaClient },
+      ) => {
+        const result = await context.prisma.user.delete({
+          where: {
+            id: args.id
+          }
+        });
+        return result ? true : false;
       },
     },
   },

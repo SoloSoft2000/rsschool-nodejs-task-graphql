@@ -1,8 +1,8 @@
 import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import { PostType, CreatePostInput } from './types/postType.js';
+import { PostType, CreatePostInput, ChangePostInput } from './types/postType.js';
 import { PrismaClient } from '@prisma/client';
-import { UserType, CreateUserInput } from './types/userType.js';
-import { ProfileType, CreateProfileInput } from './types/profileType.js';
+import { UserType, CreateUserInput, ChangeUserInput } from './types/userType.js';
+import { ProfileType, CreateProfileInput, ChangeProfileInput } from './types/profileType.js';
 import { UUIDType } from './types/uuid.js';
 
 export const MutationType = new GraphQLObjectType({
@@ -123,5 +123,73 @@ export const MutationType = new GraphQLObjectType({
         return result ? true : false;
       },
     },
+    changePost: {
+      type: new GraphQLNonNull(PostType),
+      args: {
+        dto: { type: new GraphQLNonNull(ChangePostInput) },
+        id: { type: new GraphQLNonNull(UUIDType) }
+      },
+      resolve: async (
+        source,
+        args: { id: string, dto: { title?: string, content?: string, authorId?: string } },
+        context: { prisma: PrismaClient },
+      ) => {
+        const result = await context.prisma.post.update({
+          where: {
+            id: args.id
+          },
+          data: args.dto,
+        });
+        return result;
+      },
+    },
+    changeProfile: {
+      type: new GraphQLNonNull(ProfileType),
+      args: {
+        dto: {
+          type: new GraphQLNonNull(ChangeProfileInput),
+        },
+        id: { type: new GraphQLNonNull(UUIDType) }
+      },
+      resolve: async (
+        source,
+        args: { id: string, dto: { isMale?: boolean,
+          yearOfBirth?: number,
+          memberTypeId?: string,
+          userId?: string } },
+        context: { prisma: PrismaClient },
+      ) => {
+        const result = await context.prisma.profile.update({
+          where: {
+            id: args.id
+          },
+          data: args.dto,
+        });
+        return result;
+      },
+    },
+    changeUser: {
+      type: new GraphQLNonNull(UserType),
+      args: {
+        dto: {
+          type: new GraphQLNonNull(ChangeUserInput),
+        },
+        id: { type: new GraphQLNonNull(UUIDType) }
+      },
+      resolve: async (
+        source,
+        args: { id: string, dto: { name: string, balance: number } },
+        context: { prisma: PrismaClient },
+      ) => {
+        const result = await context.prisma.user.update({
+          where: {
+            id: args.id
+          },
+          data: args.dto,
+        });
+        return result;
+      },
+    },
+
   },
 });

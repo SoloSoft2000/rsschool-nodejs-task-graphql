@@ -10,11 +10,7 @@ export const MutationType = new GraphQLObjectType({
   fields: {
     createPost: {
       type: new GraphQLNonNull(PostType),
-      args: {
-        dto: {
-          type: new GraphQLNonNull(CreatePostInput),
-        },
-      },
+      args: { dto: { type: new GraphQLNonNull(CreatePostInput) } },
       resolve: async (
         source,
         args: { dto: { title: string, content: string, authorId: string } },
@@ -144,7 +140,7 @@ export const MutationType = new GraphQLObjectType({
       },
     },
     changeProfile: {
-      type: new GraphQLNonNull(ProfileType),
+      type: ProfileType,
       args: {
         dto: {
           type: new GraphQLNonNull(ChangeProfileInput),
@@ -159,13 +155,13 @@ export const MutationType = new GraphQLObjectType({
           userId?: string } },
         context: { prisma: PrismaClient },
       ) => {
-        const result = await context.prisma.profile.update({
+          const result = await context.prisma.profile.update({
           where: {
             id: args.id
           },
           data: args.dto,
         });
-        return result;
+        return result;        
       },
     },
     changeUser: {

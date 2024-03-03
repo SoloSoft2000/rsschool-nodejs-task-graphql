@@ -30,7 +30,9 @@ export type User = {
 export type Context = {
   prisma: PrismaClient,
   userLoader: DataLoader<string, User>,
-  postLoader: DataLoader<string, Post>,
+  postLoader: DataLoader<string, Post[]>,
   profileLoader: DataLoader<string, Profile>,
-  memberTypeLoader: DataLoader<string, Member>
+  memberTypeLoader: DataLoader<string, Member>,
+  userSubscribedToLoader: DataLoader<string, User[]>,
+  subscribedToUserLoader: DataLoader<string, User[]>,
 };

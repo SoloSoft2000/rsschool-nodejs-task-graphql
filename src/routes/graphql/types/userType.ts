@@ -1,8 +1,7 @@
 import { GraphQLFloat, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { ProfileType } from "./profileType.js";
-import { getProfileByUserId } from "../getsData.js";
-import { PrismaClient } from "@prisma/client";
 import { PostType } from "./postType.js";
+import { Context } from "./loaderType.js";
 
 export const UserType: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
@@ -12,20 +11,17 @@ export const UserType: GraphQLObjectType = new GraphQLObjectType({
     balance: { type: GraphQLInt },
     profile: {
       type: ProfileType,
-      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) => getProfileByUserId(user.id, context)
+      resolve: async (user: { id: string }, args, context: Context) => 
+        await context.profileLoader.load(user.id)
     },
     posts: {
       type: new GraphQLList(PostType),
-      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) =>
-        context.prisma.post.findMany({
-          where: {
-            authorId: user.id
-          }
-        })
+      resolve: async (user: { id: string }, args, context) =>
+        await context.postLoader.load(user.id)
     },
     userSubscribedTo: {
       type: new GraphQLList(UserType),
-      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) => {
+      resolve: (user: { id: string }, args, context) => {
         return context.prisma.user.findMany({
           where: {
             subscribedToUser: {
@@ -39,7 +35,7 @@ export const UserType: GraphQLObjectType = new GraphQLObjectType({
     },
     subscribedToUser: {
       type: new GraphQLList(UserType),
-      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) => {
+      resolve: (user: { id: string }, args, context) => {
         return context.prisma.user.findMany({
           where: {
             userSubscribedTo: {

@@ -4,6 +4,7 @@ import { GraphQLSchema, graphql, validate, parse } from 'graphql';
 import { QueryType } from './queryType.js';
 import depthLimit from 'graphql-depth-limit';
 import { MutationType } from './mutationType.js';
+import { loaders } from './loaders.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
@@ -34,7 +35,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         schema,
         source: query,
         variableValues: variables,
-        contextValue: { prisma }
+        contextValue: { prisma, ...loaders(prisma) }
       })
 
       return result;

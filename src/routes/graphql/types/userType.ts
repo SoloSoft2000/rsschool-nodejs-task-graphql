@@ -1,7 +1,7 @@
 import { GraphQLFloat, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { ProfileType } from "./profileType.js";
 import { PostType } from "./postType.js";
-import { Context } from "./loaderType.js";
+import { Context, User } from "./loaderType.js";
 
 export const UserType: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
@@ -11,23 +11,29 @@ export const UserType: GraphQLObjectType = new GraphQLObjectType({
     balance: { type: GraphQLInt },
     profile: {
       type: ProfileType,
-      resolve: async (user: { id: string }, args, context: Context) => 
+      resolve: async (user: User, args, context: Context) => 
         await context.profileLoader.load(user.id)
     },
     posts: {
       type: new GraphQLList(PostType),
-      resolve: async (user: { id: string }, args, context) =>
+      resolve: async (user: User, args, context) =>
         await context.postLoader.load(user.id)
     },
     userSubscribedTo: {
       type: new GraphQLList(UserType),
-      resolve: async (user: { id: string }, args, context) => 
-        await context.userSubscribedToLoader.load(user.id)
+      resolve: async (user: User, args, context) => {
+        if (user.userSubscribedTo)
+          return await context.userLoader.loadMany(user.userSubscribedTo.map((user) => user.authorId))
+        return null;
+      }
     },
     subscribedToUser: {
       type: new GraphQLList(UserType),
-      resolve: async (user: { id: string }, args, context) => 
-        await context.subscribedToUserLoader.load(user.id)
+      resolve: async (user: User, args, context) => {
+        if (user.subscribedToUser)
+          return await context.userLoader.loadMany(user.subscribedToUser.map((user) => user.subscriberId))
+        return null;
+      }
     }
     
 

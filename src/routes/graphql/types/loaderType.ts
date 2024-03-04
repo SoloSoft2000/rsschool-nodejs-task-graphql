@@ -25,6 +25,8 @@ export type User = {
   id: string;
   name: string;
   balance: number;
+  userSubscribedTo: { authorId: string }[],
+  subscribedToUser: { subscriberId: string }[]
 }
 
 export type Context = {
@@ -33,6 +35,4 @@ export type Context = {
   postLoader: DataLoader<string, Post[]>,
   profileLoader: DataLoader<string, Profile>,
   memberTypeLoader: DataLoader<string, Member>,
-  userSubscribedToLoader: DataLoader<string, User[]>,
-  subscribedToUserLoader: DataLoader<string, User[]>,
 };

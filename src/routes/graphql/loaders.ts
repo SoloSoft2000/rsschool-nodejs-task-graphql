@@ -4,6 +4,16 @@ import { Member, Post, Profile, User } from './types/loaderType.js';
 
 export const loaders = (prisma: PrismaClient) => {
   return {
+    userLoader: new DataLoader<string, User | undefined>(async (ids) => {
+      const users = await prisma.user.findMany({ 
+        where: { id: { in: [...ids] } }, 
+        include: {
+          subscribedToUser: true,
+          userSubscribedTo: true
+        } })
+
+        return ids.map((id) => users.find((user) => user.id === id))
+    }),
     profileLoader: new DataLoader<string, Profile | undefined>(async (ids) => {
       const profiles = await prisma.profile.findMany({
         where: { userId: { in: [...ids] } },
@@ -26,42 +36,6 @@ export const loaders = (prisma: PrismaClient) => {
         },
       });
       return ids.map((id) => memberTypes.find((type) => type.id === id));
-    }),
-    userSubscribedToLoader: new DataLoader<string, User[]>(async (ids) => {
-      const users = await prisma.user.findMany({
-        where: {
-          subscribedToUser: {
-            some: {
-              subscriberId: { in: [...ids] },
-            },
-          },
-        },
-        include: {
-          subscribedToUser: true,
-        },
-      });
-      const result = ids.map((id) =>
-        users.filter((user) => user.subscribedToUser.some((s) => s.subscriberId === id)),
-      );
-      return result.map((users) => (users.length ? users : []));
-    }),
-    subscribedToUserLoader: new DataLoader<string, User[]>(async (ids) => {
-      const users = await prisma.user.findMany({
-        where: {
-          userSubscribedTo: {
-            some: {
-              authorId: { in: [...ids] },
-            },
-          },
-        },
-        include: {
-          userSubscribedTo: true,
-        },
-      });
-      const result = ids.map((id) =>
-        users.filter((user) => user.userSubscribedTo.some((s) => s.authorId === id)),
-      );
-      return result.map((users) => (users.length ? users : []));
     }),
   };
 };

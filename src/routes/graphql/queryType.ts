@@ -4,8 +4,9 @@ import { PostType } from './types/postType.js';
 import { ProfileType } from './types/profileType.js';
 import { UserType } from './types/userType.js';
 import { UUIDType } from './types/uuid.js';
-import { getPost, getUser, getProfile, getMemberType } from './getsData.js';
+import { getPost, getProfile, getMemberType } from './getsData.js';
 import { Context } from './types/loaderType.js';
+import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
 
 export const QueryType = new GraphQLObjectType({
   name: 'Query',
@@ -30,8 +31,20 @@ export const QueryType = new GraphQLObjectType({
     },
     users: {
       type: new GraphQLList(UserType),
-      resolve: (source, args, context) => {
-        const users = context.prisma.user.findMany()
+      resolve: async (source, args, context, resolveInfo) => {
+        const parsedResolveInfoFragment = parseResolveInfo(resolveInfo) as ResolveTree;
+        const { fields }: { fields: { [key in string]: ResolveTree} } = simplifyParsedResolveInfoFragmentWithType(
+					parsedResolveInfoFragment,
+					UserType
+				);
+        const users = await context.prisma.user.findMany({
+          include: {
+            userSubscribedTo: !!fields.userSubscribedTo,
+            subscribedToUser: !!fields.subscribedToUser,
+          },
+        })
+
+        users.forEach((user) => context.userLoader.prime(user.id, user))
         return users;
       }
     },
@@ -53,8 +66,8 @@ export const QueryType = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(UUIDType) }
       },
-      resolve: (source, args: { id: string }, context) =>
-        getUser(args.id, context)
+      resolve: async (source, args: { id: string }, context) =>
+        await context.userLoader.load(args.id)
     },
     profile: {
       type: ProfileType,

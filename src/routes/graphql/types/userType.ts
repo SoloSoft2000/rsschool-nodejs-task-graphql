@@ -1,8 +1,7 @@
 import { GraphQLFloat, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { ProfileType } from "./profileType.js";
-import { getProfileByUserId } from "../getsData.js";
-import { PrismaClient } from "@prisma/client";
 import { PostType } from "./postType.js";
+import { Context, User } from "./loaderType.js";
 
 export const UserType: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
@@ -12,45 +11,31 @@ export const UserType: GraphQLObjectType = new GraphQLObjectType({
     balance: { type: GraphQLInt },
     profile: {
       type: ProfileType,
-      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) => getProfileByUserId(user.id, context)
+      resolve: async (user: User, args, context: Context) => 
+        await context.profileLoader.load(user.id)
     },
     posts: {
       type: new GraphQLList(PostType),
-      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) =>
-        context.prisma.post.findMany({
-          where: {
-            authorId: user.id
-          }
-        })
+      resolve: async (user: User, args, context) =>
+        await context.postLoader.load(user.id)
     },
     userSubscribedTo: {
       type: new GraphQLList(UserType),
-      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) => {
-        return context.prisma.user.findMany({
-          where: {
-            subscribedToUser: {
-              some: {
-                subscriberId: user.id
-              }
-            }
-          }
-        })
+      resolve: async (user: User, args, context) => {
+        if (user.userSubscribedTo)
+          return await context.userLoader.loadMany(user.userSubscribedTo.map((user) => user.authorId))
+        return null;
       }
     },
     subscribedToUser: {
       type: new GraphQLList(UserType),
-      resolve: (user: { id: string }, args, context: {prisma: PrismaClient}) => {
-        return context.prisma.user.findMany({
-          where: {
-            userSubscribedTo: {
-              some: {
-                authorId: user.id
-              }
-            }
-          }
-        })
+      resolve: async (user: User, args, context) => {
+        if (user.subscribedToUser)
+          return await context.userLoader.loadMany(user.subscribedToUser.map((user) => user.subscriberId))
+        return null;
       }
     }
+    
 
   })
 });

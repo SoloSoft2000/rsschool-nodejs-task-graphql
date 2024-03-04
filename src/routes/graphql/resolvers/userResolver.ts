@@ -1,10 +1,12 @@
-import { PrismaClient } from '@prisma/client';
-import { CreateUserType } from '../types/types.js';
+import { Context, CreateUserType } from '../types/types.js';
+import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
+import { UserType } from '../types/userType.js';
+import { GraphQLResolveInfo } from 'graphql';
 
 export const createUser = async (
   _,
   args: { dto: CreateUserType },
-  context: { prisma: PrismaClient },
+  context: Context,
 ) => {
   return await context.prisma.user.create({
     data: args.dto,
@@ -14,7 +16,7 @@ export const createUser = async (
 export const deleteUser = async (
   _,
   args: { id: string },
-  context: { prisma: PrismaClient },
+  context: Context,
 ) => {
   const result = await context.prisma.user.delete({
     where: {
@@ -27,7 +29,7 @@ export const deleteUser = async (
 export const changeUser = async (
   _,
   args: { id: string; dto: CreateUserType },
-  context: { prisma: PrismaClient },
+  context: Context,
 ) => {
   const result = await context.prisma.user.update({
     where: {
@@ -41,7 +43,7 @@ export const changeUser = async (
 export const subscribeTo = async (
   _,
   args: { userId: string; authorId: string },
-  context: { prisma: PrismaClient },
+  context: Context,
 ) => {
   const result = await context.prisma.user.update({
     where: {
@@ -61,7 +63,7 @@ export const subscribeTo = async (
 export const unsubscribeFrom = async (
   _,
   args: { userId: string; authorId: string },
-  context: { prisma: PrismaClient },
+  context: Context,
 ) => {
   const result = await context.prisma.subscribersOnAuthors.delete({
     where: {
@@ -73,3 +75,18 @@ export const unsubscribeFrom = async (
   });
   return result ? true : false;
 };
+
+export const getUsers = async (source, args, context: Context, resolveInfo: GraphQLResolveInfo) => {
+  const parsedResolveInfoFragment = parseResolveInfo(resolveInfo) as ResolveTree;
+  const { fields }: { fields: { [key in string]: ResolveTree } } =
+    simplifyParsedResolveInfoFragmentWithType(parsedResolveInfoFragment, UserType);
+  const users = await context.prisma.user.findMany({
+    include: {
+      userSubscribedTo: !!fields.userSubscribedTo,
+      subscribedToUser: !!fields.subscribedToUser,
+    },
+  });
+
+  users.forEach((user) => context.userLoader.prime(user.id, user));
+  return users;
+}

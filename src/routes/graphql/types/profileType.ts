@@ -8,13 +8,13 @@ import {
 } from 'graphql';
 import { MemberType } from './memberType.js';
 import { MemberTypeId } from '../../member-types/schemas.js';
-import { UUIDType } from './uuid.js';
 import { Context } from './types.js';
+import { UID } from './types.js';
 
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
   fields: {
-    id: { type: new GraphQLNonNull(UUIDType) },
+    id: { ...UID },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     memberType: {
@@ -30,7 +30,7 @@ export const CreateProfileInput = new GraphQLInputObjectType({
   fields: {
     isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
     yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
-    userId: { type: new GraphQLNonNull(UUIDType) },
+    userId: { ...UID },
     memberTypeId: { type: new GraphQLNonNull(GraphQLString) },
   },
 });

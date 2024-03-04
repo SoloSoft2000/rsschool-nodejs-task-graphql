@@ -1,12 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { CreateProfileType, ProfileTypeWithId } from '../types/types.js';
 
-export const createProfile = (
+export const createProfile = async (
   _,
   args: { dto: CreateProfileType },
   context: { prisma: PrismaClient },
 ) => {
-  return context.prisma.profile.create({
+  return await context.prisma.profile.create({
     data: args.dto,
   });
 };

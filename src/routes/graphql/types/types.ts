@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
+import { GraphQLNonNull } from 'graphql';
+import { UUIDType } from './uuid.js';
 
 export type CreatePostType = {
   title: string;
@@ -46,3 +48,5 @@ export type Context = {
   profileLoader: DataLoader<string, ProfileTypeWithId>;
   memberTypeLoader: DataLoader<string, Member>;
 };
+
+export const UID = { type: new GraphQLNonNull(UUIDType) };

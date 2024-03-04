@@ -6,7 +6,6 @@ import {
   CreateProfileInput,
   ChangeProfileInput,
 } from './types/profileType.js';
-import { UUIDType } from './types/uuid.js';
 import { changePost, createPost, deletePost } from './resolvers/postResolver.js';
 import {
   changeUser,
@@ -20,8 +19,9 @@ import {
   createProfile,
   deleteProfile,
 } from './resolvers/profileResolver.js';
+import { UID } from './types/types.js';
 
-const UID = { type: new GraphQLNonNull(UUIDType) };
+
 const ID = { id: UID };
 
 export const MutationType = new GraphQLObjectType({
